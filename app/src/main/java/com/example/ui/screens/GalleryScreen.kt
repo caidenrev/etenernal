@@ -179,7 +179,8 @@ fun PolaroidMemoryCard(
     NeoCard(
         backgroundColor = if (memory.id == "mem_1") NeoColors.PrimaryMuted else Color.White,
         shadowOffset = 8.dp,
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
+        onClick = { /* Tactile press feedback only */ }
     ) {
         Column {
             // Polaroid frame

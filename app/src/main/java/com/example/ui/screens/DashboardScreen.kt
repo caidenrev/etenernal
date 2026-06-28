@@ -24,12 +24,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import android.net.Uri
+import androidx.compose.ui.platform.LocalContext
+import com.google.firebase.storage.FirebaseStorage
 import coil.compose.AsyncImage
 import com.example.data.*
 import com.example.ui.AppViewModel
 import com.example.ui.components.*
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlinx.coroutines.launch
 
 @Composable
 fun DashboardScreen(
@@ -144,6 +150,65 @@ fun DashboardScreen(
                             fontWeight = FontWeight.Bold,
                             color = NeoColors.BorderDark.copy(alpha = 0.7f)
                         )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Lovebirds Dynamic Duo Row
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .background(Color.White, RoundedCornerShape(16.dp))
+                            .border(3.dp, NeoColors.BorderDark, RoundedCornerShape(16.dp))
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        // Your Avatar & Name
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .background(NeoColors.AccentTurquoise, CircleShape)
+                                    .border(2.dp, NeoColors.BorderDark, CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = profile?.userAvatar ?: "🦊", fontSize = 18.sp)
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = profile?.userName ?: "Revan",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Black,
+                                color = NeoColors.BorderDark
+                            )
+                        }
+
+                        // Heart Connector
+                        Text(
+                            text = " 💞 ",
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(horizontal = 10.dp)
+                        )
+
+                        // Partner Avatar & Name
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .background(NeoColors.AccentYellow, CircleShape)
+                                    .border(2.dp, NeoColors.BorderDark, CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = profile?.partnerAvatar ?: "🐰", fontSize = 18.sp)
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = profile?.partnerName ?: "Viona",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Black,
+                                color = NeoColors.BorderDark
+                            )
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -326,13 +391,20 @@ fun DashboardScreen(
 
             if (partnerMemories.isEmpty() && partnerWishlist.isEmpty()) {
                 // Show a standard default memory card
-                PartnerMemoryPlaceholderCard(profile?.partnerName ?: "Partner") {
+                PartnerMemoryPlaceholderCard(
+                    partnerName = profile?.partnerName ?: "Partner",
+                    partnerAvatar = profile?.partnerAvatar ?: "🐰"
+                ) {
                     viewModel.setTab("Gallery")
                 }
             } else {
                 if (partnerMemories.isNotEmpty()) {
                     val latest = partnerMemories.first()
-                    PartnerMemoryRealCard(latest, profile?.partnerName ?: "Partner") {
+                    PartnerMemoryRealCard(
+                        memory = latest,
+                        partnerName = profile?.partnerName ?: "Partner",
+                        partnerAvatar = profile?.partnerAvatar ?: "🐰"
+                    ) {
                         viewModel.setTab("Gallery")
                     }
                     Spacer(modifier = Modifier.height(16.dp))
@@ -340,7 +412,11 @@ fun DashboardScreen(
 
                 if (partnerWishlist.isNotEmpty()) {
                     val latestWish = partnerWishlist.first()
-                    PartnerWishlistCard(latestWish, profile?.partnerName ?: "Partner") {
+                    PartnerWishlistCard(
+                        item = latestWish,
+                        partnerName = profile?.partnerName ?: "Partner",
+                        partnerAvatar = profile?.partnerAvatar ?: "🐰"
+                    ) {
                         viewModel.setTab("Wishlist")
                     }
                 } else {
@@ -408,12 +484,13 @@ fun DashboardScreen(
 }
 
 @Composable
-fun PartnerMemoryPlaceholderCard(partnerName: String, onViewGallery: () -> Unit) {
+fun PartnerMemoryPlaceholderCard(partnerName: String, partnerAvatar: String, onViewGallery: () -> Unit) {
     NeoCard(
         backgroundColor = NeoColors.PrimaryMuted,
         shadowOffset = 8.dp,
         modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(0.dp)
+        contentPadding = PaddingValues(0.dp),
+        onClick = onViewGallery
     ) {
         Column {
             // Polaroid-like Image Container
@@ -481,7 +558,7 @@ fun PartnerMemoryPlaceholderCard(partnerName: String, onViewGallery: () -> Unit)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "NEW PHOTO UPLOADED",
+                        text = "NEW PHOTO BY $partnerName $partnerAvatar",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = NeoColors.BorderDark.copy(alpha = 0.6f)
@@ -520,12 +597,13 @@ fun PartnerMemoryPlaceholderCard(partnerName: String, onViewGallery: () -> Unit)
 }
 
 @Composable
-fun PartnerMemoryRealCard(memory: Memory, partnerName: String, onViewGallery: () -> Unit) {
+fun PartnerMemoryRealCard(memory: Memory, partnerName: String, partnerAvatar: String, onViewGallery: () -> Unit) {
     NeoCard(
         backgroundColor = NeoColors.PrimaryMuted,
         shadowOffset = 8.dp,
         modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(0.dp)
+        contentPadding = PaddingValues(0.dp),
+        onClick = onViewGallery
     ) {
         Column {
             Box(
@@ -584,7 +662,7 @@ fun PartnerMemoryRealCard(memory: Memory, partnerName: String, onViewGallery: ()
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "NEW PHOTO FROM $partnerName",
+                        text = "NEW PHOTO FROM $partnerName $partnerAvatar",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = NeoColors.BorderDark.copy(alpha = 0.6f)
@@ -623,11 +701,12 @@ fun PartnerMemoryRealCard(memory: Memory, partnerName: String, onViewGallery: ()
 }
 
 @Composable
-fun PartnerWishlistCard(item: WishlistItem, partnerName: String, onViewWishlist: () -> Unit) {
+fun PartnerWishlistCard(item: WishlistItem, partnerName: String, partnerAvatar: String, onViewWishlist: () -> Unit) {
     NeoCard(
         backgroundColor = NeoColors.PrimaryMuted,
         shadowOffset = 6.dp,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onViewWishlist
     ) {
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -639,7 +718,7 @@ fun PartnerWishlistCard(item: WishlistItem, partnerName: String, onViewWishlist:
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = "WISHLIST UPDATED BY $partnerName",
+                    text = "WISHLIST UPDATED BY $partnerName $partnerAvatar",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = NeoColors.BorderDark.copy(alpha = 0.6f)
@@ -720,6 +799,105 @@ fun AddMemoryDialog(
 
     val categories = listOf("Date Nights 🍷", "Trips ✈️", "General")
 
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var isUploading by remember { mutableStateOf(false) }
+    var uploadProgress by remember { mutableStateOf(0f) }
+    var uploadStatusText by remember { mutableStateOf("") }
+    var useSimulationMode by remember { mutableStateOf(false) }
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { selectedUri ->
+            isUploading = true
+            uploadProgress = 0f
+            uploadStatusText = "Initializing cloud upload..."
+            useSimulationMode = false
+
+            val isFirebaseReady = try {
+                com.google.firebase.FirebaseApp.getInstance()
+                true
+            } catch (e: Exception) {
+                false
+            }
+
+            if (isFirebaseReady) {
+                try {
+                    val storage = FirebaseStorage.getInstance()
+                    val storageRef = storage.reference
+                    val fileName = "memories/${UUID.randomUUID()}.jpg"
+                    val fileRef = storageRef.child(fileName)
+
+                    fileRef.putFile(selectedUri)
+                        .addOnProgressListener { taskSnapshot ->
+                            val progress = (taskSnapshot.bytesTransferred.toFloat() / taskSnapshot.totalByteCount.toFloat())
+                            uploadProgress = progress
+                            uploadStatusText = "Uploading: ${(progress * 100).toInt()}%"
+                        }
+                        .addOnSuccessListener {
+                            fileRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                                photoUrl = downloadUri.toString()
+                                isUploading = false
+                                uploadStatusText = "Uploaded successfully! ✨"
+                            }.addOnFailureListener { e ->
+                                uploadStatusText = "URL resolution failed. Simulating local uri..."
+                                useSimulationMode = true
+                                scope.launch {
+                                    val steps = 10
+                                    for (i in 1..steps) {
+                                        kotlinx.coroutines.delay(80)
+                                        uploadProgress = i.toFloat() / steps.toFloat()
+                                    }
+                                    photoUrl = selectedUri.toString()
+                                    isUploading = false
+                                }
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            uploadStatusText = "Upload failed. Simulating local uri..."
+                            useSimulationMode = true
+                            scope.launch {
+                                val steps = 10
+                                for (i in 1..steps) {
+                                    kotlinx.coroutines.delay(80)
+                                    uploadProgress = i.toFloat() / steps.toFloat()
+                                }
+                                photoUrl = selectedUri.toString()
+                                isUploading = false
+                            }
+                        }
+                } catch (e: Exception) {
+                    useSimulationMode = true
+                    scope.launch {
+                        val steps = 15
+                        for (i in 1..steps) {
+                            kotlinx.coroutines.delay(60)
+                            uploadProgress = i.toFloat() / steps.toFloat()
+                            uploadStatusText = "Simulating Cloud Upload: ${(uploadProgress * 100).toInt()}%"
+                        }
+                        photoUrl = selectedUri.toString()
+                        isUploading = false
+                        uploadStatusText = "Simulation Complete! (Using local content URI)"
+                    }
+                }
+            } else {
+                useSimulationMode = true
+                scope.launch {
+                    val steps = 15
+                    for (i in 1..steps) {
+                        kotlinx.coroutines.delay(60)
+                        uploadProgress = i.toFloat() / steps.toFloat()
+                        uploadStatusText = "Simulating Cloud Upload: ${(uploadProgress * 100).toInt()}%"
+                    }
+                    photoUrl = selectedUri.toString()
+                    isUploading = false
+                    uploadStatusText = "Simulation Complete! (Using local content URI)"
+                }
+            }
+        }
+    }
+
     Dialog(onDismissRequest = onDismiss) {
         NeoCard(
             backgroundColor = Color.White,
@@ -739,7 +917,9 @@ fun AddMemoryDialog(
 
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
             ) {
                 Text("Memory Title:", fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 NeoTextField(value = title, onValueChange = { title = it }, placeholder = "e.g., Beachside Dinner")
@@ -750,8 +930,124 @@ fun AddMemoryDialog(
                 Text("Location:", fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 NeoTextField(value = location, onValueChange = { location = it }, placeholder = "e.g., Jimbaran, Bali")
 
-                Text("Photo URL (Optional):", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                NeoTextField(value = photoUrl, onValueChange = { photoUrl = it }, placeholder = "Unsplash or path...")
+                Text("Upload Photo:", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(110.dp)
+                        .background(Color.White, RoundedCornerShape(12.dp))
+                        .border(2.dp, NeoColors.BorderDark, RoundedCornerShape(12.dp))
+                        .clickable { imagePickerLauncher.launch("image/*") }
+                        .padding(12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (photoUrl.isNotEmpty()) {
+                        Row(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            AsyncImage(
+                                model = photoUrl,
+                                contentDescription = "Preview",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .size(70.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .border(2.dp, NeoColors.BorderDark, RoundedCornerShape(8.dp))
+                            )
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Photo Uploaded/Selected! 🎉", fontWeight = FontWeight.Black, fontSize = 13.sp)
+                                Text(
+                                    photoUrl,
+                                    maxLines = 1,
+                                    fontSize = 11.sp,
+                                    color = NeoColors.BorderDark.copy(alpha = 0.6f)
+                                )
+                                Text("Tap to change", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = NeoColors.PrimaryPink)
+                            }
+                        }
+                    } else {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.AddAPhoto,
+                                contentDescription = "Add Photo",
+                                tint = NeoColors.BorderDark,
+                                modifier = Modifier.size(28.dp)
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text("Tap to Choose from Gallery & Upload", fontSize = 13.sp, fontWeight = FontWeight.Black, color = NeoColors.BorderDark)
+                        }
+                    }
+                }
+
+                if (isUploading) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(NeoColors.AccentYellow.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
+                            .border(2.dp, NeoColors.BorderDark, RoundedCornerShape(12.dp))
+                            .padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = uploadStatusText,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = NeoColors.BorderDark
+                            )
+                            Text(
+                                text = "${(uploadProgress * 100).toInt()}%",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Black,
+                                color = NeoColors.BorderDark
+                            )
+                        }
+
+                        // Neobrutalist Progress Bar
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(16.dp)
+                                .background(Color.White, RoundedCornerShape(8.dp))
+                                .border(2.dp, NeoColors.BorderDark, RoundedCornerShape(8.dp))
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .fillMaxWidth(uploadProgress)
+                                    .background(NeoColors.PrimaryPink, RoundedCornerShape(6.dp))
+                            )
+                        }
+                    }
+                }
+
+                if (useSimulationMode) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(NeoColors.AccentTurquoise.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
+                            .border(1.5.dp, NeoColors.BorderDark, RoundedCornerShape(8.dp))
+                            .padding(8.dp)
+                    ) {
+                        Text(
+                            text = "ℹ️ Simulator Active: No valid Firebase google-services.json detected. App will render your chosen image directly from local device cache!",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = NeoColors.BorderDark.copy(alpha = 0.8f)
+                        )
+                    }
+                }
+
+                Text("Photo URL (Manual Override):", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                NeoTextField(value = photoUrl, onValueChange = { photoUrl = it }, placeholder = "Or enter URL manually...")
 
                 Text("Type:", fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 Row(

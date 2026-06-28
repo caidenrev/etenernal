@@ -230,12 +230,14 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
     }
 
     // Re-couple or rename profiles
-    fun updateProfile(yourName: String, partnerName: String, spaceId: String, anniversaryLong: Long) {
+    fun updateProfile(yourName: String, partnerName: String, spaceId: String, anniversaryLong: Long, yourAvatar: String, partnerAvatar: String) {
         viewModelScope.launch {
             val current = coupleProfile.value ?: CoupleProfile()
             val updated = current.copy(
                 userName = yourName,
+                userAvatar = yourAvatar,
                 partnerName = partnerName,
+                partnerAvatar = partnerAvatar,
                 spaceId = spaceId.ifEmpty { "SPACE-LOVE-${(10..99).random()}" },
                 anniversaryLong = anniversaryLong
             )

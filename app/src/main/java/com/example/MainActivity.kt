@@ -84,6 +84,8 @@ fun AppShell(viewModel: AppViewModel) {
                     spaceId = profile?.spaceId ?: "SPACE-LOVE-48",
                     userName = profile?.userName ?: "Revan",
                     partnerName = profile?.partnerName ?: "Viona",
+                    userAvatar = profile?.userAvatar ?: "🦊",
+                    partnerAvatar = profile?.partnerAvatar ?: "🐰",
                     onProfileClick = { viewModel.setTab("Alerts") }
                 )
             },
@@ -182,6 +184,8 @@ fun TopAppBarComponent(
     spaceId: String,
     userName: String = "Revan",
     partnerName: String = "Viona",
+    userAvatar: String = "🦊",
+    partnerAvatar: String = "🐰",
     onProfileClick: () -> Unit
 ) {
     // Elegant, transparent background header from Artistic Flair Design
@@ -223,7 +227,7 @@ fun TopAppBarComponent(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.clickable { onProfileClick() }
             ) {
-                // User Initial Avatar
+                // User Avatar
                 Box(
                     modifier = Modifier
                         .size(44.dp)
@@ -233,14 +237,13 @@ fun TopAppBarComponent(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = userName.firstOrNull()?.toString()?.uppercase() ?: "R",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Black,
-                        color = NeoColors.BorderDark
+                        text = userAvatar,
+                        fontSize = 22.sp,
+                        textAlign = TextAlign.Center
                     )
                 }
 
-                // Overlapping Partner Initial Avatar
+                // Overlapping Partner Avatar
                 Box(
                     modifier = Modifier
                         .offset(x = (-12).dp)
@@ -251,10 +254,9 @@ fun TopAppBarComponent(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = partnerName.firstOrNull()?.toString()?.uppercase() ?: "V",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Black,
-                        color = Color.White
+                        text = partnerAvatar,
+                        fontSize = 22.sp,
+                        textAlign = TextAlign.Center
                     )
                 }
             }

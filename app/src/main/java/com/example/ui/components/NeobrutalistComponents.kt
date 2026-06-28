@@ -1,6 +1,10 @@
 package com.example.ui.components
 
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -50,9 +54,41 @@ fun NeoCard(
     shadowOffset: Dp = 8.dp,
     cornerRadius: Dp = 12.dp,
     contentPadding: PaddingValues = PaddingValues(16.dp),
+    onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Box(modifier = modifier.padding(bottom = shadowOffset, end = shadowOffset)) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by if (onClick != null) {
+        interactionSource.collectIsPressedAsState()
+    } else {
+        remember { mutableStateOf(false) }
+    }
+
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 1.04f else 1.0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMedium
+        ),
+        label = "CardScale"
+    )
+
+    val cardModifier = if (onClick != null) {
+        modifier
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+    } else {
+        modifier
+    }
+
+    Box(modifier = cardModifier.padding(bottom = shadowOffset, end = shadowOffset)) {
         // Shadow Layer (placed behind with offset)
         Box(
             modifier = Modifier
@@ -94,9 +130,22 @@ fun NeoButton(
     val shadowOffset by animateDpAsState(targetValue = if (isPressed) 0.dp else shadowOffsetMax, label = "ShadowOffset")
     val translateOffset by animateDpAsState(targetValue = if (isPressed) shadowOffsetMax else 0.dp, label = "TranslateOffset")
 
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 1.05f else 1.0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMedium
+        ),
+        label = "ButtonScale"
+    )
+
     Box(
         modifier = modifier
             .testTag(testTag)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
             .clickable(
                 interactionSource = interactionSource,
                 indication = null, // No standard ripple, tactile neobrutalist offset behaves as feedback

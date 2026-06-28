@@ -9,8 +9,10 @@ data class CoupleProfile(
     @PrimaryKey val id: Int = 1,
     val userId: String = "user_revan",
     val userName: String = "Revan",
+    val userAvatar: String = "🦊",
     val partnerId: String = "user_viona",
     val partnerName: String = "Viona",
+    val partnerAvatar: String = "🐰",
     val spaceId: String = "SPACE-LOVE-99",
     val isPaired: Boolean = true,
     val anniversaryLong: Long = 1676332800000L, // 14 Feb 2023 default

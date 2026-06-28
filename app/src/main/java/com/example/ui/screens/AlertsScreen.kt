@@ -2,10 +2,13 @@ package com.example.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -34,7 +37,9 @@ fun AlertsScreen(
     val profile by viewModel.coupleProfile.collectAsState()
 
     var editYourName by remember(profile) { mutableStateOf(profile?.userName ?: "Revan") }
+    var editYourAvatar by remember(profile) { mutableStateOf(profile?.userAvatar ?: "🦊") }
     var editPartnerName by remember(profile) { mutableStateOf(profile?.partnerName ?: "Viona") }
+    var editPartnerAvatar by remember(profile) { mutableStateOf(profile?.partnerAvatar ?: "🐰") }
     var editSpaceId by remember(profile) { mutableStateOf(profile?.spaceId ?: "SPACE-LOVE-48") }
 
     // Use simple date parameters for Anniversary
@@ -182,13 +187,65 @@ fun AlertsScreen(
                     )
                 }
 
-                // Inputs
-                Text("Your Profile Name:", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                NeoTextField(value = editYourName, onValueChange = { editYourName = it }, placeholder = "Your name")
+                // 2.1 Your Profile Selection
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(NeoColors.AccentTurquoise.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
+                        .border(2.dp, NeoColors.BorderDark, RoundedCornerShape(12.dp))
+                        .padding(12.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "YOUR PROFILE",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                color = NeoColors.BorderDark,
+                                modifier = Modifier
+                                    .background(NeoColors.AccentTurquoise, RoundedCornerShape(4.dp))
+                                    .border(1.5.dp, NeoColors.BorderDark, RoundedCornerShape(4.dp))
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                        Text("Display Name:", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        NeoTextField(value = editYourName, onValueChange = { editYourName = it }, placeholder = "Your name")
 
-                Text("Partner's Profile Name:", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                NeoTextField(value = editPartnerName, onValueChange = { editPartnerName = it }, placeholder = "Partner's name")
+                        Text("Choose Your Avatar Icon:", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        AvatarSelectorRow(selectedAvatar = editYourAvatar, onAvatarSelected = { editYourAvatar = it })
+                    }
+                }
 
+                // 2.2 Partner's Profile Selection
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(NeoColors.PrimaryPink.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
+                        .border(2.dp, NeoColors.BorderDark, RoundedCornerShape(12.dp))
+                        .padding(12.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "PARTNER PROFILE",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                color = NeoColors.BorderDark,
+                                modifier = Modifier
+                                    .background(NeoColors.PrimaryPink, RoundedCornerShape(4.dp))
+                                    .border(1.5.dp, NeoColors.BorderDark, RoundedCornerShape(4.dp))
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                        Text("Display Name:", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        NeoTextField(value = editPartnerName, onValueChange = { editPartnerName = it }, placeholder = "Partner's name")
+
+                        Text("Choose Partner's Avatar Icon:", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        AvatarSelectorRow(selectedAvatar = editPartnerAvatar, onAvatarSelected = { editPartnerAvatar = it })
+                    }
+                }
+
+                // 2.3 Shared Space ID
                 Text("Shared Space ID Code:", fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 NeoTextField(value = editSpaceId, onValueChange = { editSpaceId = it }, placeholder = "e.g., SPACE-LOVE-99")
 
@@ -221,7 +278,9 @@ fun AlertsScreen(
                                 yourName = editYourName,
                                 partnerName = editPartnerName,
                                 spaceId = editSpaceId,
-                                anniversaryLong = cal.timeInMillis
+                                anniversaryLong = cal.timeInMillis,
+                                yourAvatar = editYourAvatar,
+                                partnerAvatar = editPartnerAvatar
                             )
                         } catch (e: Exception) {
                             viewModel.showToast("Invalid Anniversary Date values!")
@@ -397,3 +456,58 @@ fun AlertItemRow(alert: AlertNotification, onDelete: () -> Unit) {
         }
     }
 }
+
+@Composable
+fun AvatarSelectorRow(
+    selectedAvatar: String,
+    onAvatarSelected: (String) -> Unit
+) {
+    val avatars = listOf("🦊", "🐰", "🐻", "🐼", "🐱", "🐶", "🐧", "🐨", "🦖", "🦄", "🐥", "🐹")
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        avatars.forEach { emoji ->
+            val isSelected = emoji == selectedAvatar
+            Box(
+                modifier = Modifier
+                    .size(54.dp)
+                    .clickable { onAvatarSelected(emoji) }
+            ) {
+                if (isSelected) {
+                    // Elevated shadow
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .offset(x = 3.dp, y = 3.dp)
+                            .background(NeoColors.BorderDark, CircleShape)
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            if (isSelected) NeoColors.AccentYellow else Color.White,
+                            CircleShape
+                        )
+                        .border(
+                            if (isSelected) 3.dp else 1.5.dp,
+                            NeoColors.BorderDark,
+                            CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = emoji,
+                        fontSize = 26.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
+    }
+}
+
