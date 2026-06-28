@@ -1,0 +1,6 @@
+{
+  "name": "EternalMoments",
+  "description": "Our private couples space to share memories, track wishlists, view calendars, and record anniversaries with a bold Neobrutalist design.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
