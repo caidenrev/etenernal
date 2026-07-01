@@ -40,7 +40,9 @@ import com.example.ui.AppViewModelFactory
 import com.example.ui.components.NeoButton
 import com.example.ui.components.NeoCard
 import com.example.ui.components.NeoColors
+import com.example.ui.components.polkadotBackground
 import com.example.ui.screens.*
+import com.example.ui.utils.IconHelper
 
 class MainActivity : ComponentActivity() {
 
@@ -76,6 +78,7 @@ fun AppShell(viewModel: AppViewModel) {
         modifier = Modifier
             .fillMaxSize()
             .background(NeoColors.Background)
+            .polkadotBackground()
     ) {
         // Safe drawing wrapper
         Scaffold(
@@ -184,8 +187,8 @@ fun TopAppBarComponent(
     spaceId: String,
     userName: String = "Revan",
     partnerName: String = "Viona",
-    userAvatar: String = "🦊",
-    partnerAvatar: String = "🐰",
+    userAvatar: String = "face",
+    partnerAvatar: String = "person",
     onProfileClick: () -> Unit
 ) {
     // Elegant, transparent background header from Artistic Flair Design
@@ -236,10 +239,11 @@ fun TopAppBarComponent(
                         .zIndex(2f),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = userAvatar,
-                        fontSize = 22.sp,
-                        textAlign = TextAlign.Center
+                    Icon(
+                        imageVector = IconHelper.getAvatarIcon(userAvatar),
+                        contentDescription = "User Avatar",
+                        tint = NeoColors.BorderDark,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
 
@@ -253,10 +257,11 @@ fun TopAppBarComponent(
                         .zIndex(1f),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = partnerAvatar,
-                        fontSize = 22.sp,
-                        textAlign = TextAlign.Center
+                    Icon(
+                        imageVector = IconHelper.getAvatarIcon(partnerAvatar),
+                        contentDescription = "Partner Avatar",
+                        tint = NeoColors.BorderDark,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }

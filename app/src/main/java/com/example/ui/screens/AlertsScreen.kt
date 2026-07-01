@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import com.example.data.AlertNotification
 import com.example.ui.AppViewModel
 import com.example.ui.components.*
+import com.example.ui.utils.IconHelper
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -37,9 +38,9 @@ fun AlertsScreen(
     val profile by viewModel.coupleProfile.collectAsState()
 
     var editYourName by remember(profile) { mutableStateOf(profile?.userName ?: "Revan") }
-    var editYourAvatar by remember(profile) { mutableStateOf(profile?.userAvatar ?: "🦊") }
+    var editYourAvatar by remember(profile) { mutableStateOf(profile?.userAvatar ?: "face") }
     var editPartnerName by remember(profile) { mutableStateOf(profile?.partnerName ?: "Viona") }
-    var editPartnerAvatar by remember(profile) { mutableStateOf(profile?.partnerAvatar ?: "🐰") }
+    var editPartnerAvatar by remember(profile) { mutableStateOf(profile?.partnerAvatar ?: "person") }
     var editSpaceId by remember(profile) { mutableStateOf(profile?.spaceId ?: "SPACE-LOVE-48") }
 
     // Use simple date parameters for Anniversary
@@ -462,7 +463,7 @@ fun AvatarSelectorRow(
     selectedAvatar: String,
     onAvatarSelected: (String) -> Unit
 ) {
-    val avatars = listOf("🦊", "🐰", "🐻", "🐼", "🐱", "🐶", "🐧", "🐨", "🦖", "🦄", "🐥", "🐹")
+    val avatars = IconHelper.avatarIconsMap.keys.toList()
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -470,12 +471,12 @@ fun AvatarSelectorRow(
             .padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        avatars.forEach { emoji ->
-            val isSelected = emoji == selectedAvatar
+        avatars.forEach { iconKey ->
+            val isSelected = iconKey == selectedAvatar
             Box(
                 modifier = Modifier
                     .size(54.dp)
-                    .clickable { onAvatarSelected(emoji) }
+                    .clickable { onAvatarSelected(iconKey) }
             ) {
                 if (isSelected) {
                     // Elevated shadow
@@ -500,10 +501,11 @@ fun AvatarSelectorRow(
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = emoji,
-                        fontSize = 26.sp,
-                        textAlign = TextAlign.Center
+                    Icon(
+                        imageVector = IconHelper.getAvatarIcon(iconKey),
+                        contentDescription = "Avatar Icon",
+                        tint = NeoColors.BorderDark,
+                        modifier = Modifier.size(26.dp)
                     )
                 }
             }

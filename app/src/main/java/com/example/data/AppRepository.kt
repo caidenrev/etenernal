@@ -51,10 +51,10 @@ class AppRepository(private val appDao: AppDao) {
             val defaultProfile = CoupleProfile(
                 userId = "user_revan",
                 userName = "Revan",
-                userAvatar = "🦊",
+                userAvatar = "face",
                 partnerId = "user_viona",
                 partnerName = "Viona",
-                partnerAvatar = "🐰",
+                partnerAvatar = "person",
                 spaceId = "SPACE-LOVE-48",
                 isPaired = true,
                 anniversaryLong = cal.timeInMillis

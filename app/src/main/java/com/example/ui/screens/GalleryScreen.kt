@@ -11,6 +11,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Terrain
+import androidx.compose.material.icons.filled.Fastfood
+import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.Flight
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -41,7 +47,7 @@ fun GalleryScreen(
     val searchQuery by viewModel.searchQuery.collectAsState()
     val activeFilter by viewModel.memoryFilter.collectAsState()
 
-    val filterOptions = listOf("All Memories", "Date Nights 🍷", "Trips ✈️")
+    val filterOptions = listOf("All Memories", "Date Nights", "Trips")
 
     Column(
         modifier = modifier
@@ -166,14 +172,14 @@ fun PolaroidMemoryCard(
         sdf.format(Date(memory.dateLong))
     }
 
-    // Select suitable emoji tag dynamically or mock based on title
-    val emoji = when {
-        memory.title.contains("anniversary", ignoreCase = true) -> "😍"
-        memory.title.contains("mountain", ignoreCase = true) -> "🏕️"
-        memory.title.contains("ice cream", ignoreCase = true) || memory.title.contains("treat", ignoreCase = true) -> "🍦"
-        memory.title.contains("sushi", ignoreCase = true) || memory.title.contains("dinner", ignoreCase = true) -> "🍣"
-        memory.memoryType.contains("trip", ignoreCase = true) -> "✈️"
-        else -> "💖"
+    // Select suitable icon tag dynamically or mock based on title
+    val icon = when {
+        memory.title.contains("anniversary", ignoreCase = true) -> Icons.Default.Favorite
+        memory.title.contains("mountain", ignoreCase = true) -> Icons.Default.Terrain
+        memory.title.contains("ice cream", ignoreCase = true) || memory.title.contains("treat", ignoreCase = true) -> Icons.Default.Fastfood
+        memory.title.contains("sushi", ignoreCase = true) || memory.title.contains("dinner", ignoreCase = true) -> Icons.Default.Restaurant
+        memory.memoryType.contains("trip", ignoreCase = true) -> Icons.Default.Flight
+        else -> Icons.Default.Star
     }
 
     NeoCard(
@@ -248,10 +254,11 @@ fun PolaroidMemoryCard(
                     )
                 }
 
-                Text(
-                    text = emoji,
-                    fontSize = 32.sp,
-                    modifier = Modifier.padding(start = 8.dp)
+                Icon(
+                    imageVector = icon,
+                    contentDescription = "Memory Icon",
+                    tint = NeoColors.BorderDark,
+                    modifier = Modifier.padding(start = 8.dp).size(32.dp)
                 )
             }
 

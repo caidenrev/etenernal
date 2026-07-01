@@ -20,6 +20,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.SColor
+import androidx.compose.ui.graphics.graphicsLayer
+
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
@@ -288,8 +293,32 @@ fun NeoCheckbox(
                     contentDescription = "Checked",
                     tint = NeoColors.BorderDark,
                     modifier = Modifier.size(20.dp)
-                )
+                }
             }
         }
     }
 }
+
+fun Modifier.polkadotBackground(
+    dotColor: Color = Color.Black.copy(alpha = 0.1f),
+    dotRadius: Dp = 2.dp,
+    spacing: Dp = 24.dp
+): Modifier = this.then(
+    Modifier.drawBehind {
+        val radiusPx = dotRadius.toPx()
+        val spacingPx = spacing.toPx()
+        
+        val columns = (size.width / spacingPx).toInt() + 1
+        val rows = (size.height / spacingPx).toInt() + 1
+        
+        for (i in 0 until columns) {
+            for (j in 0 until rows) {
+                drawCircle(
+                    color = dotColor,
+                    radius = radiusPx,
+                    center = Offset(i * spacingPx, j * spacingPx)
+                )
+            }
+        }
+    }
+)
